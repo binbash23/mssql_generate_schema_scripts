@@ -11,3 +11,22 @@ Notes   : Run this tool in an administrator powershell.
           You can exclude/include the object types to export in the top of the script.
 Example : .\export_schema_definition.ps1 sql-server my_database dbo c:\temp
 ```
+
+
+If you only want to generate scripts for stored procedures and no other objects, edit the header variables in the script and set them to $true or $false:
+
+```
+...
+# Select object types to export
+$export_views = $true
+$export_tables = $true
+$export_functions = $true
+$export_db_triggers = $true
+$export_table_triggers = $true
+$export_stored_procedures = $true
+...
+```
+
+Please post comments, feature requests and/or bugs.
+
+Best regards, Jens
