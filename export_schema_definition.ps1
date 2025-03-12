@@ -9,13 +9,6 @@
 # NOTE: run this tool in an administrator powershell 
 #
 
-# Start Script
-#Set-ExecutionPolicy RemoteSigned
-#Set-ExecutionPolicy -ExecutionPolicy:Unrestricted -Scope:LocalMachine
-
-#$DebugPreference = "Continue"
-#$DebugPreference = "SilentlyContinue"
-
 ###############################################################################
 # Set Target variables 
 ###############################################################################
@@ -28,6 +21,7 @@ $export_table_triggers = $true
 $export_stored_procedures = $true
 #
 ###############################################################################
+
 $exported_tables = 0
 $exported_views = 0
 $exported_functions = 0
@@ -38,7 +32,6 @@ $exported_stored_procedures = 0
 
 function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnection]$serverName, [string]$dbname, [string]$schema_name, [string]$scriptpath)
 {
-	#$info_string=">>> Exporting object definitions from database: " + $dbname + ", schema: " + $schema_name + " to folder: " + $scriptpath	
 	Write-host ">>> Exporting object definitions from" $target_db_server"database:"  $dbname", schema:" $schema_name "to folder"  $scriptpath
 	Write-host ">>> Using:" $serverName
 	[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.SMO") | Out-Null
@@ -68,9 +61,6 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	$scr.Options = $options
 	
 	if ($export_tables) {
-		#=============
-		# Tables
-		#=============
 		Write-host ">>> Searching tables to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_tables.sql"
 		New-Item $options.FileName -type file -force | Out-Null
@@ -80,7 +70,6 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 			Write-host     "Checking table   :" $object_name
 			If ($tb.Schema -eq $schema_name -And $tb.IsSystemObject -eq $FALSE)
 			{
-				#$info_string = "Processing object : " + $object_name	
 				Write-host "Processing table :"  $object_name
 				$smoObjects = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
 				$smoObjects.Add($tb.Urn)	
@@ -91,15 +80,9 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	}
 
 	if ($export_views) {
-		#=============
-		# Views
-		#=============
 		Write-host ">>> Searching views to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_views.sql"
-		#$options.FileName = $scriptpath + "views.sql"
-		#Write-host ">>" $options.FileName
 		New-Item $options.FileName -type file -force | Out-Null
-		#$views = $db.Views | where {$_.IsSystemObject -eq $false}
 		$views = $db.Views 
 		Foreach ($view in $views)
 		{
@@ -116,9 +99,6 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	}
 
 	if ($export_stored_procedures) {
-		#=============
-		# stored_procedures
-		#=============
 		Write-host ">>> Searching stored procedures to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_stored_procedures.sql"
 		#$stored_procedures = $db.stored_procedures | where {$_.IsSystemObject -eq $false}
@@ -138,9 +118,6 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	}
 		
 	if ($export_functions) {
-		#=============
-		# Functions
-		#=============
 		Write-host ">>> Searching functions to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_functions.sql"
 		$user_defined_functions = $db.UserDefinedFunctions #| where {$_.IsSystemObject -eq $false}
@@ -158,46 +135,46 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		} 
 	}
 		
-#	if ($export_db_triggers) {
-#		#=============
-#		# db_triggers
-#		#=============
-#		Write-host ">>> Searching triggers to process..."
-#		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_db_triggers.sql"
-#		$db_triggers = $db.Triggers
-#		
-#		New-Item $options.FileName -type file -force | Out-Null
-#		foreach ($trigger in $db.triggers)
-#		{
-#			$object_name = $trigger.Schema + "." + $trigger.Name
-#			Write-host     "Checking trigger   :" $object_name
-#			if ($trigger -ne $null -And $trigger.Schema -eq $schema_name -And $trigger.IsSystemObject -eq $FALSE)
-#			{
-#				Write-host "Processing trigger :" $object_name
-#				$scr.Script($trigger)
-#				$script:exported_db_triggers++
-#			}
-#		}
-#	}
-		
-		
-		
-#		#=============
-#		# Table Triggers
-#		#=============
-#		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_table_triggers.sql"
-#		New-Item $options.FileName -type file -force | Out-Null
-#		Foreach ($tb in $db.Tables)
-#		{     
-#			if($tb.triggers -ne $null)
-#			{
-#				foreach ($trigger in $tb.triggers)
-#			{
-#				$scr.Script($trigger)
-#			}
-#		}
-#		} 
+	if ($export_db_triggers) {
+		Write-host ">>> Searching triggers to process..."
+		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_db_triggers.sql"
+		$db_triggers = $db.Triggers
+		Write-host $db_triggers
+		New-Item $options.FileName -type file -force | Out-Null
+		foreach ($trigger in $db.triggers)
+		{
+			$object_name = $trigger.Schema + "." + $trigger.Name
+			Write-host     "Checking trigger   :" $object_name
+			if ($trigger -ne $null -And $trigger.Schema -eq $schema_name -And $trigger.IsSystemObject -eq $FALSE)
+			{
+				Write-host "Processing trigger :" $object_name
+				$scr.Script($trigger)
+				$script:exported_db_triggers++
+			}
+		}
+	}			
+
+	if ($export_table_triggers) {
+		Write-host ">>> Searching table triggers to process..."
+		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_table_triggers.sql"
+		New-Item $options.FileName -type file -force | Out-Null
+		Foreach ($tb in $db.Tables)
+		{     
+			$object_name = $tb.Schema + "." + $tb.Name
+			Write-host         "Checking table for trigger :" $object_name
+			if($tb.Schema -eq $schema_name -And $tb.IsSystemObject -eq $FALSE -And $tb.triggers -ne $null)
+			{
+				foreach ($trigger in $tb.triggers)
+				{
+					$object_name = $tb.Schema + "." + $tb.Name + "." + $trigger.Name
+					Write-host "Processing table trigger   :" $object_name
+					$scr.Script($trigger)
+				}
+			}
+		} 
+	}
 }
+
 
 function write_export_stats() {
 	Write-Host
