@@ -169,6 +169,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 					$object_name = $tb.Schema + "." + $tb.Name + "." + $trigger.Name
 					Write-host "Processing table trigger   :" $object_name
 					$scr.Script($trigger)
+					$script:exported_table_triggers++
 				}
 			}
 		} 
@@ -217,7 +218,9 @@ if ($args[0] -And $args[1] -And $args[2])
 } else {
 	Write-host "Written 2025 by jens heine <binbash@gmx.net>"
 	Write-host "Usage   : export_schema_definition.ps1 MSSQLSERVER_NAME DB_NAME SCHEMA_NAME EXPORT_PATH"
-	Write-host "Note    : Run this tool in an administrator powershell. The export path does not allow spaces."
+	Write-host "Notes   : Run this tool in an administrator powershell."
+	Write-host "          The export path does not allow spaces."
+	Write-host "          You can exclude/include the objects to export in the top of the script."
 	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo c:\temp"
 	exit 1
 }
