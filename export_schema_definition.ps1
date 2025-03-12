@@ -209,7 +209,7 @@ $start_date = Get-Date
 ###[System.Reflection.Assembly]::LoadWithPartialName("Microsoft.SqlServer.Dmf.Common") | Out-Null
 
 # Process script arguments if set
-if ($args[0] -And $args[1] -And $args[2]) 
+if ($args[0] -And $args[1] -And $args[2] -And $args[3]) 
 {
 	$target_db_server = $args[0]
 	$target_db_name = $args[1]
@@ -217,11 +217,12 @@ if ($args[0] -And $args[1] -And $args[2])
 	$target_export_path = $args[3]
 } else {
 	Write-host "Written 2025 by jens heine <binbash@gmx.net>"
+	Write-host
 	Write-host "Usage   : export_schema_definition.ps1 MSSQLSERVER_NAME DB_NAME SCHEMA_NAME EXPORT_PATH"
 	Write-host "Notes   : Run this tool in an administrator powershell."
 	Write-host "          The export path does not allow spaces."
 	Write-host "          You can exclude/include the objects to export in the top of the script."
-	Write-host "Example : .\export_schema_definition.ps1 sql-server my_database dbo c:\temp"
+	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo c:\temp"
 	exit 1
 }
 
