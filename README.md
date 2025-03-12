@@ -13,7 +13,7 @@ Example : .\export_schema_definition.ps1 sql-server my_database dbo c:\temp
 ```
 
 
-If you only want to generate scripts for stored procedures and no other objects, edit the header variables in the script and set them to $true or $false:
+If you only want to generate scripts for stored procedures i.e. and no other objects, edit the header variables in the script and set them to $true or $false:
 
 ```
 ...
