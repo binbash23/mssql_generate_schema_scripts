@@ -13,8 +13,8 @@
 # Set Target variables 
 ###############################################################################
 # Select object types to export
-$export_tables = $true
 $export_views = $true
+$export_tables = $true
 $export_functions = $true
 $export_db_triggers = $true
 $export_table_triggers = $true
@@ -22,8 +22,8 @@ $export_stored_procedures = $true
 #
 ###############################################################################
 
-$exported_tables = 0
 $exported_views = 0
+$exported_tables = 0
 $exported_functions = 0
 $exported_db_triggers = 0
 $exported_table_triggers = 0
@@ -221,7 +221,7 @@ if ($args[0] -And $args[1] -And $args[2])
 	Write-host "Notes   : Run this tool in an administrator powershell."
 	Write-host "          The export path does not allow spaces."
 	Write-host "          You can exclude/include the objects to export in the top of the script."
-	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo c:\temp"
+	Write-host "Example : .\export_schema_definition.ps1 sql-server my_database dbo c:\temp"
 	exit 1
 }
 
