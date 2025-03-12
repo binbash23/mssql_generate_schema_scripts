@@ -20,11 +20,11 @@
 # Set Target variables 
 ###############################################################################
 # Select object types to export
-$export_tables = $false
-$export_views = $false
-$export_functions = $false
-$export_db_triggers = $false
-$export_table_triggers = $false
+$export_tables = $true
+$export_views = $true
+$export_functions = $true
+$export_db_triggers = $true
+$export_table_triggers = $true
 $export_stored_procedures = $true
 #
 ###############################################################################
