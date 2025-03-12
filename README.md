@@ -1,5 +1,6 @@
 # mssql_generate_schema_scripts
 Generate a complete set of SQL scripts for a Microsoft SQL Server database/schema.
+The generated scripts include table, view, function, trigger and stored procedure definitions. Also indices, column store table stuff, ... are included.
 
 ```
 Written 2025 by jens heine <binbash@gmx.net>
