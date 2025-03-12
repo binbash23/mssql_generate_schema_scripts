@@ -13,12 +13,12 @@
 # Set Target variables 
 ###############################################################################
 # Select object types to export
-$export_tables = $true
-$export_views = $true
-$export_functions = $true
-$export_db_triggers = $true
+$export_tables = $false
+$export_views = $false
+$export_functions = $false
+$export_db_triggers = $false
 $export_table_triggers = $true
-$export_stored_procedures = $true
+$export_stored_procedures = $false
 #
 ###############################################################################
 
@@ -218,7 +218,7 @@ if ($args[0] -And $args[1] -And $args[2])
 	Write-host "Written 2025 by jens heine <binbash@gmx.net>"
 	Write-host "Usage   : export_schema_definition.ps1 MSSQLSERVER_NAME DB_NAME SCHEMA_NAME EXPORT_PATH"
 	Write-host "Note    : Run this tool in an administrator powershell. The export path does not allow spaces."
-	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo ""c:\temp"""
+	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo c:\temp"
 	exit 1
 }
 
