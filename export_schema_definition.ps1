@@ -177,7 +177,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 }
 
 
-function write_export_stats() {
+function show_export_stats() {
 	Write-Host
 	Write-host ">>> Export statistics"
 	Write-host "Exported tables            :" $exported_tables
@@ -235,7 +235,7 @@ generate_db_script $conn $target_db_name $target_schema_name $target_export_path
 
 show_export_directory
 
-write_export_stats
+show_export_stats
 
 $end_date= Get-Date
 $time_diff= New-TimeSpan -Start $start_date -End $end_date
