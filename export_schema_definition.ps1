@@ -63,6 +63,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	if ($export_tables) {
 		Write-host ">>> Searching tables to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_tables.sql"
+		Write-host "--"$options.FileName
 		New-Item $options.FileName -type file -force | Out-Null
 		Foreach ($tb in $db.Tables)
 		{
@@ -214,14 +215,13 @@ if ($args[0] -And $args[1] -And $args[2] -And $args[3])
 	$target_db_server = $args[0]
 	$target_db_name = $args[1]
 	$target_schema_name = $args[2]
-	$target_export_path = $args[3]
+	$target_export_path = resolve-path $args[3]
 } else {
 	Write-host "Written 2025 by jens heine <binbash@gmx.net>"
 	Write-host
 	Write-host "Usage   : export_schema_definition.ps1 MSSQLSERVER_NAME DB_NAME SCHEMA_NAME EXPORT_PATH"
 	Write-host "Notes   : Run this tool in an administrator powershell."
-	Write-host "          The export path does not allow spaces."
-	Write-host "          You can exclude/include the object types to export in the top of the script."
+	Write-host "          You can exclude/include the objects to export in the top of the script."
 	Write-host "Example : export_schema_definition.ps1 sql-server my_database dbo c:\temp"
 	exit 1
 }
