@@ -26,6 +26,8 @@ $export_stored_procedures = $true
 ...
 ```
 
+As a result you get 6 files including the sql scripts for the database objects (tables, views, ...) and a summry report how many objects of each type have been generated.
+
 Please post comments, feature requests and/or bugs.
 
 Best regards, Jens
