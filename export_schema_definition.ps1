@@ -22,15 +22,17 @@ $export_stored_procedures = $true
 #
 ###############################################################################
 
-$exported_views = 0
-$exported_tables = 0
-$exported_functions = 0
-$exported_db_triggers = 0
-$exported_table_triggers = 0
-$exported_stored_procedures = 0
+$global:exported_views_list = New-Object -TypeName System.Collections.ArrayList
+$global:exported_tables_list = New-Object -TypeName System.Collections.ArrayList
+$global:exported_functions_list = New-Object -TypeName System.Collections.ArrayList
+$global:exported_db_triggers_list = New-Object -TypeName System.Collections.ArrayList
+$global:exported_table_triggers_list = New-Object -TypeName System.Collections.ArrayList
+$global:exported_stored_procedures_list = New-Object -TypeName System.Collections.ArrayList
+
 
 
 function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnection]$serverName, [string]$dbname, [string]$schema_name, [string]$scriptpath)
+#function generate_db_script()
 {
 	Write-host ">>> Exporting object definitions from" $target_db_server"database:"  $dbname", schema:" $schema_name "to folder"  $scriptpath
 	Write-host ">>> Using:" $serverName
@@ -75,7 +77,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 				$smoObjects = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
 				$smoObjects.Add($tb.Urn)	
 				$scr.Script($smoObjects)
-				$script:exported_tables++
+				$exported_tables_list.Add($object_name) | out-null
 			} 
 		}
 	}
@@ -89,12 +91,11 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		{
 			$object_name = $view.Schema + "." + $view.Name
 			Write-host     "Checking view   :" $object_name
-			#if ($views -ne $null)
 			If ($view -ne $null -And $view.Schema -eq $schema_name -And $view.IsSystemObject -eq $FALSE)
 			{
 				Write-host "Processing view :" $object_name
 				$scr.Script($view)
-				$script:exported_views++
+				$global:exported_views_list.Add($object_name) | out-null
 			}
 		}
 	}
@@ -113,7 +114,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 			{   
 				Write-host "Processing stored procedure :" $object_name
 				$scr.Script($stored_procedure)
-				$script:exported_stored_procedures++
+				$exported_stored_procedures_list.Add($object_name) | out-null
 			}
 		} 
 	}
@@ -131,7 +132,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 			{
 				Write-host "Processing function :" $object_name
 				$scr.Script($function)
-				$script:exported_functions++
+				$exported_functions_list.Add($object_name) | out-null
 			}
 		} 
 	}
@@ -150,7 +151,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 			{
 				Write-host "Processing trigger :" $object_name
 				$scr.Script($trigger)
-				$script:exported_db_triggers++
+				$exported_db_triggers_list.Add($object_name) | out-null
 			}
 		}
 	}			
@@ -170,7 +171,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 					$object_name = $tb.Schema + "." + $tb.Name + "." + $trigger.Name
 					Write-host "Processing table trigger   :" $object_name
 					$scr.Script($trigger)
-					$script:exported_table_triggers++
+					$global:exported_table_triggers_list.Add($object_name) | out-null
 				}
 			}
 		} 
@@ -180,13 +181,44 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 
 function show_export_stats() {
 	Write-Host
-	Write-host ">>> Export statistics"
-	Write-host "Exported tables            :" $exported_tables
-	Write-host "Exported views             :" $exported_views
-	Write-host "Exported functions         :" $exported_functions
-	Write-host "Exported db triggers       :" $exported_db_triggers
-	Write-host "Exported table triggers    :" $exported_table_triggers
-	Write-host "Exported stored procedures :" $exported_stored_procedures
+	Write-host "<<< Export statistics >>>"
+	Write-host
+	Write-host "---Exported tables---" 
+	Write-host
+	$global:exported_tables_list
+	Write-host
+	Write-host "---Exported views---" 
+	Write-host
+	$global:exported_views_list
+	Write-host
+	Write-host "---Exported functions---" 
+	Write-host
+	$global:exported_functions_list
+	Write-host
+	Write-host "---Exported db triggers---" 
+	Write-host
+	$global:exported_db_triggers_list
+	Write-host
+	Write-host "---Exported table triggers---" 
+	Write-host
+	$global:exported_table_triggers_list
+	Write-host
+	Write-host "---Exported stored procedures---" 
+	Write-host
+	$global:exported_stored_procedures_list
+	Write-host
+	Write-host "<<< Export statistics summary >>>"
+	Write-host
+	Write-host "Server                     :" $target_db_server
+	Write-host "Database                   :" $target_db_name
+	Write-host "Schema                     :" $target_schema_name 
+	Write-host "Target folder              :" $target_export_path
+	Write-host "Exported tables            :" $global:exported_tables_list.Count
+	Write-host "Exported views             :" $global:exported_views_list.Count
+	Write-host "Exported functions         :" $global:exported_functions_list.Count
+	Write-host "Exported db triggers       :" $global:exported_db_triggers_list.Count
+	Write-host "Exported table triggers    :" $global:exported_table_triggers_list.Count
+	Write-host "Exported stored procedures :" $global:exported_stored_procedures_list.Count
 	Write-Host
 }
 
