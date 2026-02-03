@@ -8,6 +8,8 @@
 #
 # NOTE: run this tool in an administrator powershell 
 #
+# 20260131 jens heine: encoding set to utf to enable git diff
+#
 
 ###############################################################################
 # Set Target variables 
@@ -19,6 +21,14 @@ $export_functions = $true
 $export_db_triggers = $true
 $export_table_triggers = $true
 $export_stored_procedures = $true
+$be_verbose = $false
+
+#$export_views = $true
+#$export_tables = $false
+#$export_functions = $false
+#$export_db_triggers = $false
+#$export_table_triggers = $false
+#$export_stored_procedures = $false
 #
 ###############################################################################
 
@@ -58,6 +68,7 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	$options.ToFileOnly = $true
 	$options.AppendToFile = $true
 	$options.ScriptDrops = $false 
+	$options.Encoding = [System.Text.Encoding]::UTF8
 	
 	# Set options for SMO.Scripter
 	$scr.Options = $options
@@ -65,15 +76,15 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 	if ($export_tables) {
 		Write-host ">>> Searching tables to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_tables.sql"
-		Write-host "--"$options.FileName
-		New-Item $options.FileName -type file -force | Out-Null
+		#Write-host "--"$options.FileName
+		New-Item $options.FileName -Type File -force | Out-Null
 		Foreach ($tb in $db.Tables)
 		{
 			$object_name = $tb.Schema + "." + $tb.Name
-			Write-host     "Checking table   :" $object_name
+			if ($be_verbose) { Write-host     "Checking table   :" $object_name }
 			If ($tb.Schema -eq $schema_name -And $tb.IsSystemObject -eq $FALSE)
 			{
-				Write-host "Processing table :"  $object_name
+				if ($be_verbose) { Write-host "Processing table :"  $object_name }
 				$smoObjects = New-Object Microsoft.SqlServer.Management.Smo.UrnCollection
 				$smoObjects.Add($tb.Urn)	
 				$scr.Script($smoObjects)
@@ -90,10 +101,10 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		Foreach ($view in $views)
 		{
 			$object_name = $view.Schema + "." + $view.Name
-			Write-host     "Checking view   :" $object_name
+			if ($be_verbose) { Write-host     "Checking view   :" $object_name }
 			If ($view -ne $null -And $view.Schema -eq $schema_name -And $view.IsSystemObject -eq $FALSE)
 			{
-				Write-host "Processing view :" $object_name
+				if ($be_verbose) { Write-host "Processing view :" $object_name }
 				$scr.Script($view)
 				$global:exported_views_list.Add($object_name) | out-null
 			}
@@ -109,10 +120,10 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		Foreach ($stored_procedure in $stored_procedures)
 		{
 			$object_name = $stored_procedure.Schema + "." + $stored_procedure.Name
-			Write-host     "Checking stored procedure   :" $object_name
+			if ($be_verbose) { Write-host     "Checking stored procedure   :" $object_name }
 			if ($stored_procedure -ne $null -And $stored_procedure.Schema -eq $schema_name -And $stored_procedure.IsSystemObject -eq $FALSE)
 			{   
-				Write-host "Processing stored procedure :" $object_name
+				if ($be_verbose) { Write-host "Processing stored procedure :" $object_name }
 				$scr.Script($stored_procedure)
 				$exported_stored_procedures_list.Add($object_name) | out-null
 			}
@@ -127,10 +138,10 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		Foreach ($function in $user_defined_functions)
 		{
 			$object_name = $function.Schema + "." + $function.Name
-			Write-host     "Checking function   :" $object_name
+			if ($be_verbose) { Write-host     "Checking function   :" $object_name }
 			if ($function -ne $null -And $function.Schema -eq $schema_name -And $function.IsSystemObject -eq $FALSE)
 			{
-				Write-host "Processing function :" $object_name
+				if ($be_verbose) { Write-host "Processing function :" $object_name }
 				$scr.Script($function)
 				$exported_functions_list.Add($object_name) | out-null
 			}
@@ -141,15 +152,15 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		Write-host ">>> Searching triggers to process..."
 		$options.FileName = $scriptpath + "\$($dbname)_$($schema_name)_db_triggers.sql"
 		$db_triggers = $db.Triggers
-		Write-host $db_triggers
+		# Write-host $db_triggers
 		New-Item $options.FileName -type file -force | Out-Null
 		foreach ($trigger in $db.triggers)
 		{
 			$object_name = $trigger.Schema + "." + $trigger.Name
-			Write-host     "Checking trigger   :" $object_name
+			if ($be_verbose) { Write-host     "Checking trigger   :" $object_name }
 			if ($trigger -ne $null -And $trigger.Schema -eq $schema_name -And $trigger.IsSystemObject -eq $FALSE)
 			{
-				Write-host "Processing trigger :" $object_name
+				if ($be_verbose) { Write-host "Processing trigger :" $object_name }
 				$scr.Script($trigger)
 				$exported_db_triggers_list.Add($object_name) | out-null
 			}
@@ -163,13 +174,13 @@ function generate_db_script([Microsoft.SqlServer.Management.Common.ServerConnect
 		Foreach ($tb in $db.Tables)
 		{     
 			$object_name = $tb.Schema + "." + $tb.Name
-			Write-host         "Checking table for trigger :" $object_name
+			if ($be_verbose) { Write-host         "Checking table for trigger :" $object_name }
 			if($tb.Schema -eq $schema_name -And $tb.IsSystemObject -eq $FALSE -And $tb.triggers -ne $null)
 			{
 				foreach ($trigger in $tb.triggers)
 				{
 					$object_name = $tb.Schema + "." + $tb.Name + "." + $trigger.Name
-					Write-host "Processing table trigger   :" $object_name
+					if ($be_verbose) { Write-host "Processing table trigger   :" $object_name }
 					$scr.Script($trigger)
 					$global:exported_table_triggers_list.Add($object_name) | out-null
 				}
@@ -263,9 +274,11 @@ $conn = New-Object Microsoft.SqlServer.Management.Common.ServerConnection
 $conn.ConnectionString = "Data Source=$($target_db_server);Initial Catalog=$($target_db_name);Integrated Security=True"
 
 # Call Main function
+Write-host ">>> Started at" $(Get-Date)
 generate_db_script $conn $target_db_name $target_schema_name $target_export_path
+Write-host ">>> Finished at" $(Get-Date)
 
-show_export_directory
+if ($be_verbose) { show_export_directory }
 
 show_export_stats
 
